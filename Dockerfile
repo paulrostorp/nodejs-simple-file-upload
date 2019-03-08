@@ -3,6 +3,8 @@ FROM node:10.15.1-stretch-slim as node-version
 
 FROM node-version as builder
 WORKDIR /usr/src/app
+# Create upload folder. Makes sure inheriting images on Docker Desktop are not creating this folder belonging to root.
+RUN mkdir uploads
 # Use cache
 COPY package*.json ./
 RUN npm install
