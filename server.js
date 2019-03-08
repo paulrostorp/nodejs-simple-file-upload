@@ -5,6 +5,8 @@ var fs  = require('fs');
 var app = express();
 app.set('view engine', 'ejs');
 
+app.use(require('morgan')('dev'));
+
 app.get('/', (req, res) => {
     res.render('index');
 });
