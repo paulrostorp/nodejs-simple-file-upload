@@ -4,4 +4,5 @@
 !views
 !server.js
 !package.json
+!yarn.lock
 !package-lock.json

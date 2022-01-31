@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 RUN mkdir uploads
 # Use cache
 COPY package*.json ./
-COPY yarn.lock ./
+COPY yarn.lock .
 RUN yarn install
 COPY . .
 
