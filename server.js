@@ -1,37 +1,40 @@
-var express = require('express');
-var multer  = require('multer');
-var fs  = require('fs');
+const express = require('express');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 var app = express();
-app.set('view engine', 'ejs');
 
 app.use(require('morgan')('dev'));
 
-app.get('/', (req, res) => {
-    res.render('index');
+var storage = multer.diskStorage({
+  destination: function (req, _, callback) {
+    var dir = path.join('./uploads', req.params.path);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    callback(null, dir);
+  },
+  filename: function (req, _, callback) {
+    callback(null, req.params.fileName);
+  }
 });
 
-var storage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        var dir = './uploads';
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-        }
-        callback(null, dir);
-    },
-    filename: function (req, file, callback) {
-        callback(null, file.originalname);
+var upload = multer({ storage: storage }).single("data")
+
+app.put('/:namespace/:path/:fileName', function (req, res, next) {
+  upload(req, res, function (err) {
+    if (err) {
+      console.log(err);
+      return res.end("Something went wrong: " + err.message);
     }
-});
-var upload = multer({storage: storage}).array('files', 12);
-app.post('/upload', function (req, res, next) {
-    upload(req, res, function (err) {
-        if (err) {
-            console.log(err);
-            return res.end("Something went wrong: " + err.message);
-        }
-        res.end("Upload completed.");
-    });
+    res.status(201).end("Upload completed: " + req.params.path + "/" + req.params.fileName);
+  });
 })
 
-app.listen(3000);
+app.get('/:path/:fileName', function (req, res) {
+  const file = `${__dirname}/uploads/${req.params.path}/${req.params.fileName}`;
+  res.download(file);
+});
+
+app.listen(3000, () => console.debug("Server running"));
